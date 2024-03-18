@@ -10,6 +10,11 @@ npm run build
 npm start
 ```
 
+You will need to use a reverse proxy like nginx to proxy on both http and https, as oraxen requires https to uplaod packs, but it also replaces the https in the url with http for some reason. 
+(like actually, what is [this](https://github.com/oraxen/oraxen/blob/master/core/src/main/java/io/th0rgal/oraxen/pack/upload/hosts/Polymath.java#L57))
+
+It's recommended to use a process manager like pm2 to keep the server running.
+
 ## config
 
 ```json
