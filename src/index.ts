@@ -68,7 +68,7 @@ app.get("/pack.zip", (req, res) => {
         return res.status(404).json({"error": "No pack found"})
     }
 
-    res.setHeader('Content-disposition', `attachment; filename=${id}.zip`).setHeader('Content-type', 'application/zip').sendFile(pack);
+    res.setHeader('Content-type', 'application/zip').sendFile(pack);
 })
 
 app.get("/debug", (req, res) => {
