@@ -29,7 +29,7 @@ app.post("/upload", async (req, res) => {
 
     // id is formencoded 
 
-    console.log(req.body.id)
+    console.log(`debug: upload request made: ${JSON.stringify(req.body)}`)
 
     const id = req.body.id as string;
     const pack = req.files?.pack as fileUpload.UploadedFile;
@@ -64,6 +64,8 @@ app.post("/upload", async (req, res) => {
  */
 app.get("/pack.zip", (req, res) => {
     const id = req.query.id as string;
+
+    console.log(`debug: pack.zip request made: ${JSON.stringify(req.query)}`)
 
     if (!id) {
         return res.status(400).json({"error": "No id provided"})
