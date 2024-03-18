@@ -42,9 +42,9 @@ app.post("/upload", async (req, res) => {
         return res.status(400).json({"error": "No pack provided"})
     }
 
-    const hash = await packManager.register(pack.data, id, (req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || req.socket.remoteAddress) as string);
+    const hash = packManager.register(pack.data, id, (req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || req.socket.remoteAddress) as string);
 
-    res.status(200).json({ "pack": `${config.serverUrl}/pack.zip?id=${hash}`, "sha1": hash });
+    res.status(200).json({ "url": `${config.serverUrl}/pack.zip?id=${hash}`, "sha1": hash });
 })
 
 /**
