@@ -1,8 +1,7 @@
-import fs from "fs"
-import path from "path"
+import fs from "fs";
+import path from "path";
 import Config from "./config";
 import PackManager from "./packs";
-
 
 export default class Cleaner {
 
@@ -12,22 +11,41 @@ export default class Cleaner {
         }, config.cleanerDelay)
     }
 
-    public static clean(packManager: PackManager, config: Config) {
-        const now = Date.now()
+    public static async clean(packManager: PackManager, config: Config) {
+        const now = Date.now();
         for (const hash in packManager.registry) {
             if (now - packManager.registry[hash].lastDownload > config.packLifespan) {
-                delete packManager.registry[hash]
+                if (config.useS3 && packManager.s3) {
+                    // Delete from S3
+                    await packManager.s3.deleteObject({
+                        Bucket: config.s3Config.bucketName,
+                        Key: hash
+                    }).promise();
+                } else {
+                    // Delete from local storage
+                    const filePath = path.resolve(packManager.packsPath, hash);
+                    if (fs.existsSync(filePath)) {
+                        fs.unlinkSync(filePath);
+                    }
+                }
+                delete packManager.registry[hash];
             }
         }
 
-        for (const file in fs.readdirSync(packManager.packsPath)) {
-            if (!fs.existsSync(path.resolve(packManager.packsPath, file))) {
-                fs.unlinkSync(path.resolve(packManager.packsPath, file))
-            }
+        if (!config.useS3) {
+            for (const file of fs.readdirSync(packManager.packsPath)) {
+                const filePath = path.resolve(packManager.packsPath, file);
+                if (!fs.existsSync(filePath)) {
+                    fs.unlinkSync(filePath);
+                }
 
-            if (!packManager.registry[file]) {
-                fs.unlinkSync(path.resolve(packManager.packsPath, file))
+                if (!packManager.registry[file]) {
+                    fs.unlinkSync(filePath);
+                }
             }
         }
+
+        // Save the updated registry
+        fs.writeFileSync(packManager.registryPath, JSON.stringify(packManager.registry));
     }
 }
