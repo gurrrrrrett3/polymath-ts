@@ -30,6 +30,11 @@ app.post("/upload", async (req, res) => {
     }
 
     const hash = await packManager.register(pack.data, id, (req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || req.socket.remoteAddress) as string);
+    
+    if (!hash) {
+        return res.status(500).json({ "error": "Failed to register pack" });
+    }
+
     const url = `${config.serverUrl}/pack.zip?id=${hash}`;
 
     res.status(200).json({
@@ -45,16 +50,29 @@ app.get("/pack.zip", async (req, res) => {
         return res.status(400).json({ "error": "No id provided" });
     }
 
-    const pack = await packManager.fetch(id);
+    const packPath = await packManager.fetch(id);
 
-    if (!pack) {
+    if (!packPath) {
         return res.status(404).json({ "error": "No pack found" });
     }
 
     if (config.useS3) {
-        res.setHeader('Content-type', 'application/zip').send(pack as Buffer);
+        // Download from S3
+        const params = {
+            Bucket: config.s3Config.bucketName,
+            Key: id
+        };
+        const s3Stream = packManager.s3!.getObject(params).createReadStream();
+
+        s3Stream.on('error', (err: any) => {
+            res.status(500).json({ "error": "Error downloading file from S3" });
+        });
+
+        res.setHeader('Content-Type', 'application/zip');
+        s3Stream.pipe(res);
     } else {
-        res.setHeader('Content-type', 'application/zip').sendFile(pack as string);
+        // Download from local storage
+        res.setHeader('Content-Type', 'application/zip').sendFile(packPath);
     }
 });
 

@@ -5,47 +5,39 @@ import PackManager from "./packs";
 
 export default class Cleaner {
 
-    public static start(packManager: PackManager, config: Config) {
-        setInterval(() => {
-            this.clean(packManager, config)
-        }, config.cleanerDelay)
-    }
+    static start(packManager: PackManager, config: Config) {
+        setInterval(async () => {
+            const now = Date.now();
+            const toDelete: string[] = [];
 
-    public static async clean(packManager: PackManager, config: Config) {
-        const now = Date.now();
-        for (const hash in packManager.registry) {
-            if (now - packManager.registry[hash].lastDownload > config.packLifespan) {
-                if (config.useS3 && packManager.s3) {
-                    // Delete from S3
-                    await packManager.s3.deleteObject({
-                        Bucket: config.s3Config.bucketName,
-                        Key: hash
-                    }).promise();
-                } else {
-                    // Delete from local storage
-                    const filePath = path.resolve(packManager.packsPath, hash);
-                    if (fs.existsSync(filePath)) {
-                        fs.unlinkSync(filePath);
+            for (const [hash, pack] of Object.entries(packManager.registry)) {
+                if (now - pack.lastDownload > config.packLifespan) {
+                    toDelete.push(hash);
+                }
+            }
+
+            for (const hash of toDelete) {
+                try {
+                    if (config.useS3 && packManager.s3) {
+                        const params = {
+                            Bucket: config.s3Config.bucketName,
+                            Key: hash,
+                        };
+                        await packManager.s3.deleteObject(params).promise();
+                        console.log(`Deleted ${hash} from S3`);
+                    } else {
+                        const packFile = path.resolve(packManager.packsPath, hash);
+                        if (fs.existsSync(packFile)) {
+                            fs.unlinkSync(packFile);
+                            console.log(`Deleted ${hash} from local storage`);
+                        }
                     }
-                }
-                delete packManager.registry[hash];
-            }
-        }
-
-        if (!config.useS3) {
-            for (const file of fs.readdirSync(packManager.packsPath)) {
-                const filePath = path.resolve(packManager.packsPath, file);
-                if (!fs.existsSync(filePath)) {
-                    fs.unlinkSync(filePath);
-                }
-
-                if (!packManager.registry[file]) {
-                    fs.unlinkSync(filePath);
+                    delete packManager.registry[hash];
+                    fs.writeFileSync(packManager.registryPath, JSON.stringify(packManager.registry));
+                } catch (error) {
+                    console.error(`Failed to delete ${hash}:`, error);
                 }
             }
-        }
-
-        // Save the updated registry
-        fs.writeFileSync(packManager.registryPath, JSON.stringify(packManager.registry));
+        }, config.cleanerDelay);
     }
 }

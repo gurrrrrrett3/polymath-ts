@@ -20,6 +20,7 @@ export default class Config {
             secretAccessKey: string;
             region: string;
             bucketName: string;
+            endpoint: string;
         };
     } = {
         server: {
@@ -38,7 +39,8 @@ export default class Config {
             accessKeyId: "",
             secretAccessKey: "",
             region: "",
-            bucketName: ""
+            bucketName: "",
+            endpoint: ""
         }
     };
 

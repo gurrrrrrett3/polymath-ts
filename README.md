@@ -6,7 +6,7 @@ A rewrite of [oraxen/polymath](https://github.com/oraxen/polymath) in typescript
 
 ### Using Pterodactyl
 
-- Download and Install [Eggs](www.google.com) to your Pterodactyl Panel.
+- Download and Install [Eggs](https://github.com/Arknesia/Polymath/blob/master/egg-polymath.json) to your Pterodactyl Panel.
 - Create a new server using port `8181` since 8080 used for Pterodactyl Panel.
 - Setup Nginx as below:
 
@@ -26,8 +26,8 @@ A rewrite of [oraxen/polymath](https://github.com/oraxen/polymath) in typescript
       listen 443 ssl;
       server_name atlas.domain.com;
 
-      ssl_certificate /etc/letsencrypt/live/atlas.reforged.world/fullchain.pem;
-      ssl_certificate_key /etc/letsencrypt/live/atlas.reforged.world/privkey.pem;
+      ssl_certificate /etc/letsencrypt/live/atlas.domain.com/fullchain.pem;
+      ssl_certificate_key /etc/letsencrypt/live/atlas.domain.com/privkey.pem;
 
       location / {
           proxy_pass http://0.0.0.0:8181;
@@ -55,4 +55,4 @@ Pack:
 
 ---
 
-Support: [Discord](https://discord.gg/mjmdE9C67a)
+[Discord Support](https://discord.gg/mjmdE9C67a)
