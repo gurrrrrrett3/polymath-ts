@@ -7,6 +7,8 @@ LABEL description="a simple file hosting server for oraxen"
 WORKDIR /app
 COPY . /app
 
+VOLUME [ "/app/storage" ]
+
 RUN npm install
 RUN npm run build
 
