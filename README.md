@@ -16,7 +16,7 @@ npm start
 
 ~~You will need to use a reverse proxy like nginx to proxy on both http and https, as oraxen requires https to upload packs, but it also replaces the https in the url with http for some reason.~~
 
-You no longer REQUIRE a reverse proxy for this!
+You no longer REQUIRE a reverse proxy for this, but it's still reccomended.
 [commit](https://github.com/oraxen/oraxen/commit/74b6fc6b30d562f0f3f299e076e7129ac5b06108#diff-67189ce4c452fc6da450a2d2005823059d152e9e832557f7535e88f7a750d6bcL57)
 
 It's recommended to use a process manager like pm2 to keep the server running.
