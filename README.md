@@ -4,6 +4,10 @@ a rewrite of [polymath](https://github.com/oraxen/polymath) in typescript becaus
 
 ## usage
 
+can either be run with nodejs or docker
+
+### nodejs
+
 ```
 npm i
 npm run build
@@ -17,8 +21,44 @@ You no longer REQUIRE a reverse proxy for this!
 
 It's recommended to use a process manager like pm2 to keep the server running.
 
+### docker
+
+docker-compose.yml (recommended)
+```yml
+version: '3'
+services:
+  polymath:
+    image: pull ghcr.io/gurrrrrrett3/polymath-ts:master
+    container_name: polymath
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    environment:
+      - SERVER_PORT: 8080 
+      - SERVER_URL: http://localhost:8080
+      - REQUEST_MAXSIZE: 104857600
+      - CLEANER_DELAY: 21600000
+      - CLEANER_PACKLIFESPAN: 604800000
+
+```
+
+docker cli
+```sh
+docker run -d \
+-p 8080:8080 \
+-e SERVER_PORT=8080 \
+-e SERVER_URL=http://localhost:8080 \ 
+-e REQUEST_MAXSIZE=104857600 \
+-e CLEANER_DELAY=21600000 \
+-e CLEANER_PACKLIFESPAN=604800000 \ 
+ghcr.io/gurrrrrrett3/polymath-ts:master
+```
+
 ## config
 
+config can either be done through a `config.json` file in the root directory or through environment variables.
+
+### config.json
 ```json
 {
   "server": {
@@ -34,6 +74,14 @@ It's recommended to use a process manager like pm2 to keep the server running.
   }
 }
 ```
+
+### environment variables
+
+- `SERVER_PORT` - the port the server will listen on
+- `SERVER_URL` - the url the server will return for pack downloads
+- `REQUEST_MAXSIZE` - the maximum size of a pack in bytes
+- `CLEANER_DELAY` - the delay between each clean in ms
+- `CLEANER_PACKLIFESPAN` - the lifespan of a pack in ms
 
 ## license
 
